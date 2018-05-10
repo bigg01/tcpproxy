@@ -8,8 +8,20 @@ import (
 	//"log"
 	"net"
 
+	//"github.com/prometheus/client_golang/prometheus"
+	//"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	log "github.com/sirupsen/logrus"
 )
+
+/*
+var opendConnections = prometheus.NewGauge(
+	prometheus.GaugeOpts{
+		Name: "opend_tcp_connection",
+		Help: "Current number of established Connection",
+	},
+)
+*/
 
 func init() {
 	// Log as JSON instead of the default ASCII formatter.
@@ -30,6 +42,9 @@ func init() {
 
 	// Only log the warning severity or above.
 	log.SetLevel(log.InfoLevel)
+
+	// Register Prometheus Gauge
+	// prometheus.MustRegister(opendConnections) # PROM
 }
 
 func main() {
@@ -37,6 +52,8 @@ func main() {
 		listenAddr     = flag.String("l", "", "local address to listen on")
 		remoteAddr     = flag.String("r", "", "remote address to dial")
 		logConnections = flag.Bool("logconn", false, "log connections")
+		//metricsaddr = flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
+
 	)
 
 	flag.Parse()
@@ -54,7 +71,11 @@ func main() {
 		log.Fatalf("listening: %v", err)
 	}
 
+	//http.Handle("/metrics", promhttp.Handler()) # PROM
+	//log.Fatal(http.ListenAndServe(":8080", nil)) # PROM
+
 	proxy(ln, *remoteAddr, *logConnections)
+
 }
 
 func proxy(ln net.Listener, remoteAddr string, logConnections bool) error {
@@ -66,6 +87,7 @@ func proxy(ln net.Listener, remoteAddr string, logConnections bool) error {
 
 		if logConnections {
 			log.Printf("connected: %s", conn.RemoteAddr())
+			// opendConnections.Inc() # PROM
 		}
 
 		go handle(conn, remoteAddr)
@@ -81,6 +103,7 @@ func handle(conn net.Conn, remoteAddr string) {
 		return
 	}
 	defer rconn.Close()
+	//defer opendConnections.Dec() # PROM
 
 	copy(conn, rconn)
 }
