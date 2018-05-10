@@ -13,6 +13,9 @@ $ tcpproxy -l 0.0.0.0:29418 -r origin.server:29418
 
 $ docker build -t tcpproxy:latest .
 
+# image is arround 4MB :-)
+$ docker images |grep -i tcpproxy
+tcpproxy                        latest              50938d4749ec        About a minute ago   3.48MB
 
 
 $ docker run -it  tcpproxy:latest
