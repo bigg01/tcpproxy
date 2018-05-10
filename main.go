@@ -3,25 +3,24 @@ package main
 import (
 	"flag"
 	"io"
+	"net/http"
 	"os"
 	"strings"
 	//"log"
 	"net"
 
-	//"github.com/prometheus/client_golang/prometheus"
-	//"github.com/prometheus/client_golang/prometheus/promhttp"
-
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
 
-/*
-var opendConnections = prometheus.NewGauge(
-	prometheus.GaugeOpts{
-		Name: "opend_tcp_connection",
-		Help: "Current number of established Connection",
-	},
+var (
+	proxyTCPconnection = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Name: "proxy_tcp_connection",
+			Help: "Current number of established Connection",
+		},
+	)
 )
-*/
 
 func init() {
 	// Log as JSON instead of the default ASCII formatter.
@@ -44,7 +43,7 @@ func init() {
 	log.SetLevel(log.InfoLevel)
 
 	// Register Prometheus Gauge
-	// prometheus.MustRegister(opendConnections) # PROM
+	prometheus.MustRegister(proxyTCPconnection) // prom
 }
 
 func main() {
@@ -71,8 +70,9 @@ func main() {
 		log.Fatalf("listening: %v", err)
 	}
 
-	//http.Handle("/metrics", promhttp.Handler()) # PROM
-	//log.Fatal(http.ListenAndServe(":8080", nil)) # PROM
+	// prom
+	http.Handle("/metrics", prometheus.Handler())
+	go http.ListenAndServe(":8080", nil)
 
 	proxy(ln, *remoteAddr, *logConnections)
 
@@ -87,7 +87,7 @@ func proxy(ln net.Listener, remoteAddr string, logConnections bool) error {
 
 		if logConnections {
 			log.Printf("connected: %s", conn.RemoteAddr())
-			// opendConnections.Inc() # PROM
+			proxyTCPconnection.Inc() // prom
 		}
 
 		go handle(conn, remoteAddr)
@@ -100,10 +100,11 @@ func handle(conn net.Conn, remoteAddr string) {
 	rconn, err := net.Dial("tcp", remoteAddr)
 	if err != nil {
 		log.Printf("dialing remote: %v", err)
+		proxyTCPconnection.Dec()
 		return
 	}
+	defer proxyTCPconnection.Dec()
 	defer rconn.Close()
-	//defer opendConnections.Dec() # PROM
 
 	copy(conn, rconn)
 }

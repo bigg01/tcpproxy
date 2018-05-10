@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o tcpproxy .
 FROM scratch
 
 
-EXPOSE 8023
+EXPOSE 8023 8080
 # Since we started from scratch, we'll copy the SSL root certificates from the builder
 WORKDIR /usr/local/bin
 
