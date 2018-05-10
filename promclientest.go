@@ -4,27 +4,28 @@ import (
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var jobsInQueue = prometheus.NewGauge(
-	prometheus.GaugeOpts{
-		Name: "jobs_in_queue",
-		Help: "Current number of jobs in the queue",
-	},
+var (
+	cpuTemp = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "cpu_temperature_celsius",
+		Help: "Current temperature of the CPU.",
+	})
+	hdFailures = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "hd_errors_total",
+		Help: "Number of hard-disk errors.",
+	})
 )
 
 func init() {
-	prometheus.MustRegister(jobsInQueue)
+	prometheus.MustRegister(cpuTemp)
+	prometheus.MustRegister(hdFailures)
 }
 
 func main() {
-	http.Handle("/metrics", promhttp.Handler())
-	panic(http.ListenAndServe(":8080", nil))
+	cpuTemp.Set(65.3)
+	hdFailures.Inc()
 
-	//jobsInQueue.Dec()
-	jobsInQueue.Inc()
-	jobsInQueue.Inc()
-	jobsInQueue.Inc()
-	jobsInQueue.Inc()
+	http.Handle("/metrics", prometheus.Handler())
+	http.ListenAndServe(":8080", nil)
 }
