@@ -3,9 +3,34 @@ package main
 import (
 	"flag"
 	"io"
-	"log"
+	"os"
+	"strings"
+	//"log"
 	"net"
+
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	// Log as JSON instead of the default ASCII formatter.
+	//log.SetFormatter(&log.JSONFormatter{})
+
+	ClusterEnvironment := strings.ToLower(os.Getenv("ClusterEnvironment"))
+
+	if ClusterEnvironment == "production" {
+		log.SetFormatter(&log.JSONFormatter{})
+	} else {
+		// The TextFormatter is default, you don't actually have to do this.
+		log.SetFormatter(&log.TextFormatter{})
+	}
+
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	log.SetOutput(os.Stdout)
+
+	// Only log the warning severity or above.
+	log.SetLevel(log.InfoLevel)
+}
 
 func main() {
 	var (
@@ -73,3 +98,14 @@ func copy(a, b io.ReadWriter) {
 	<-done
 	<-done
 }
+
+/*
+dns lookup
+
+ips, err := net.LookupIP("google.com")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Could not get IPs: %v\n", err)
+		os.Exit(1)
+	}
+
+*/
