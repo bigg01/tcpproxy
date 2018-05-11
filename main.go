@@ -70,11 +70,15 @@ func main() {
 		log.Fatalf("listening: %v", err)
 	}
 
+	log.Info("Staring Prom endpoint /metrics")
+
 	// prom
 	http.Handle("/metrics", prometheus.Handler())
 	go http.ListenAndServe(":8080", nil)
 
+	log.Info("Staring Proxy...")
 	log.Printf("serving : %v %v ", *listenAddr, *remoteAddr)
+
 	proxy(ln, *remoteAddr, *logConnections)
 
 }
