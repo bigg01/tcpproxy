@@ -46,3 +46,6 @@ $ curl http://localhost:8080/metrics |grep -i proxy_tcp_connection
 # HELP proxy_tcp_connection Current number of established Connection
 # TYPE proxy_tcp_connection gauge
 proxy_tcp_connection 1
+
+
+$ docker pull quay.io/bigg01/tcpproxy
