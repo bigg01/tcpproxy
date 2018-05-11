@@ -49,3 +49,24 @@ proxy_tcp_connection 1
 
 
 $ docker pull quay.io/bigg01/tcpproxy
+
+### Run TCP Server
+$ 
+
+
+$ oc run -it gotest1 --rm=true --restart='Never' --image=rhel7/rhel-tools:latest -- /bin/sh
+If you don't see a command prompt, try pressing enter.
+
+sh-4.2$ curl -v telnet://tcpproxy.tcpproxy.svc:8023
+* About to connect() to tcpproxy.tcpproxy.svc port 8023 (#0)
+*   Trying 172.30.214.132...
+* Connected to tcpproxy.tcpproxy.svc (172.30.214.132) port 8023 (#0)
+* Closing connection 0
+Message received.sh-4.2$
+
+$ echo -n "test out the server" | nc tcpproxy.tcpproxy.svc 8023
+Message received.sh-4.2$
+
+
+$ go run tcpserver.go
+Listening on 0.0.0.0:3333
