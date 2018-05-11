@@ -74,6 +74,7 @@ func main() {
 	http.Handle("/metrics", prometheus.Handler())
 	go http.ListenAndServe(":8080", nil)
 
+	log.Printf("serving : %v %v ", *listenAddr, *remoteAddr)
 	proxy(ln, *remoteAddr, *logConnections)
 
 }
