@@ -9,8 +9,8 @@ WORKDIR /go/src/tcpproxy
 RUN apk --no-cache add ca-certificates git
 
 COPY main.go /go/src/tcpproxy/main.go
-RUN GO111MODULE=on go mod init . && go get -v ./...
-RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o tcpproxy .
+#RUN GO111MODULE=on go mod init . && go get -v ./...
+RUN GO111MODULE=off CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o tcpproxy .
 
 FROM scratch
 
