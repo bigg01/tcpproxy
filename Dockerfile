@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine AS builder
+FROM golang:1.16.3-alpine AS builder
 
 #ENV GOPATH /usr/src/app
 
